@@ -58,7 +58,9 @@ export default function Checkout() {
       if (data.redirect) {
         window.location.href = data.redirect;
       } else {
-        alert('Er ging iets mis bij het starten van de betaling.');
+        console.log('Foutdetails:', data);
+alert('Er ging iets mis bij het starten van de betaling. Controleer de console.');
+
       }
     } catch (error) {
       alert('Verbinding mislukt. Probeer opnieuw.');
