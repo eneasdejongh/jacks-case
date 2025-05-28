@@ -27,11 +27,18 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // GEEN redirect-check → gewoon het hele antwoord tonen
-    return res.status(200).json({ antwoord: data });
+    // 🔐 Controle op redirect-link
+    const redirectUrl = data._links?.qrCode?.href || data._links?.deeplink?.href;
+    if (!redirectUrl) {
+      return res.status(500).json({ error: 'Geen bruikbare Payconiq-link ontvangen', data });
+    }
+
+    return res.status(200).json({ redirect: redirectUrl });
 
   } catch (error) {
-    return res.status(500).json({ error: 'Fout bij Payconiq-verbinding', details: error.message });
+    return res.status(500).json({
+      error: 'Verbinding met Payconiq mislukt',
+      details: error.message
+    });
   }
 }
-
