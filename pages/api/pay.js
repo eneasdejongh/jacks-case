@@ -23,6 +23,14 @@ export default async function handler(req, res) {
 
   const data = await response.json();
 
+if (!response.ok) {
+  console.error('Fout van Payconiq:', data);
+  return res.status(500).json({ error: 'Payconiq fout', data });
+}
+
+res.status(200).json({ redirect: data._links.redirect.href });
+
+
   if (!data._links || !data._links.redirect) {
     return res.status(500).json({ error: 'Betaling kon niet gestart worden', data });
   }
