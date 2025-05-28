@@ -1,42 +1,39 @@
-// test: herbouw afdwingen
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Alleen POST toegestaan' });
   }
 
-  const { name, email, product, amount } = req.body;
+  const { name, email, color } = req.body;
 
-  const response = await fetch('https://api.payconiq.com/v3/payments', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer e157a887-32e9-417f-aeb4-ed716b934e9b'
-    },
-    body: JSON.stringify({
-      amount: amount,
-      currency: 'EUR',
-      description: `${product} voor ${name}`,
-      reference: email,
-      callbackUrl: 'https://jackscase.be/betaald',
-      successUrl: 'https://jackscase.be/success'
-    })
-  });
+  const productName = `Jack's Case – ${color}`;
+  const amount = color === 'Goud' ? 1050 : 750; // Bedrag in centen (€10,50 of €7,50)
 
-  const data = await response.json();
+  try {
+    const response = await fetch('https://api.payconiq.com/v3/payments', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer e157a887-32e9-417f-aeb4-ed716b934e9b' // jouw API-key
+      },
+      body: JSON.stringify({
+        amount,
+        currency: 'EUR',
+        description: `${productName} voor ${name}`,
+        reference: email,
+        callbackUrl: 'https://jackscase.be/betaald',
+        successUrl: 'https://jackscase.be/success'
+      })
+    });
 
-if (!response.ok) {
-  console.error('Fout van Payconiq:', data);
-  return res.status(500).json({ error: 'Payconiq fout', data });
-}
+    const data = await response.json();
 
-res.status(200).json({ redirect: data._links.redirect.href });
+    if (!response.ok || !data._links?.redirect?.href) {
+      return res.status(500).json({ error: 'Betaling kon niet gestart worden', data });
+    }
 
+    return res.status(200).json({ redirect: data._links.redirect.href });
 
-  if (!data._links || !data._links.redirect) {
-    return res.status(500).json({ error: 'Betaling kon niet gestart worden', data });
+  } catch (error) {
+    return res.status(500).json({ error: 'Verbinding met Payconiq mislukt', details: error.message });
   }
-
-  res.status(200).json({ redirect: data._links.redirect.href });
 }
-
