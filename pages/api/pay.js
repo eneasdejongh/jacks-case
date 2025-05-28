@@ -27,8 +27,10 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    if (!response.ok || !data._links?.redirect?.href) {
-      return res.status(500).json({ error: 'Betaling kon niet gestart worden', data });
+    if (!data._links?.redirect?.href) {
+        return res.status(500).json({ error: 'Geen redirect-link ontvangen', data });
+    }
+
     }
 
     return res.status(200).json({ redirect: data._links.redirect.href });
