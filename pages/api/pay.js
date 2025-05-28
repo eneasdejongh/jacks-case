@@ -31,7 +31,7 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'Geen redirect-link ontvangen', data });
     }
 
-    }
+    
 
     return res.status(200).json({ redirect: data._links.redirect.href });
 
