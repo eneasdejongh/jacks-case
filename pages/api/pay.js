@@ -6,14 +6,14 @@ export default async function handler(req, res) {
   const { name, email, color } = req.body;
 
   const productName = `Jack's Case – ${color}`;
-  const amount = color === 'Goud' ? 1050 : 750; // Bedrag in centen (€10,50 of €7,50)
+  const amount = color === 'Goud' ? 1050 : 750;
 
   try {
     const response = await fetch('https://api.payconiq.com/v3/payments', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer e157a887-32e9-417f-aeb4-ed716b934e9b' // jouw API-key
+        'Authorization': 'Bearer e157a887-32e9-417f-aeb4-ed716b934e9b'
       },
       body: JSON.stringify({
         amount,
@@ -27,15 +27,11 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    if (!data._links?.redirect?.href) {
-        return res.status(500).json({ error: 'Geen redirect-link ontvangen', data });
-    }
-
-    
-
-    return res.status(200).json({ redirect: data._links.redirect.href });
+    // GEEN redirect-check → gewoon het hele antwoord tonen
+    return res.status(200).json({ antwoord: data });
 
   } catch (error) {
-    return res.status(500).json({ error: 'Verbinding met Payconiq mislukt', details: error.message });
+    return res.status(500).json({ error: 'Fout bij Payconiq-verbinding', details: error.message });
   }
 }
+
